@@ -18,3 +18,4 @@ dependencies:
   - vega_datasets=0.9
   - pip:
     - streamlit
+    - watchdog
