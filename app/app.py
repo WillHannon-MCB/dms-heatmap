@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import altair as alt
 
+import plotting
+import ui
 
 st.markdown("""
     # DMS-Heatmap
@@ -24,11 +26,22 @@ if upload_format == "Local Repo":
     if uploaded_file is not None: 
 
         dataframe = pd.read(uploaded_file, low_memory = False)
-        st.write(dataframe)
+        
+        target_to_plot = ui.select_target(dataframe)
+
+        st.altair_chart(plotting.plot_heatmap(dataframe, target_to_plot))
  
 else:
 
     upload_url = st.sidebar.text_input("URL to a Remote Repo")
+    
     if upload_url:
+
         dataframe = pd.read_csv(upload_url, low_memory = False)
-        st.write(dataframe)
+        
+        target_to_plot = ui.select_target(dataframe)
+
+        st.altair_chart(plotting.plot_heatmap(dataframe, target_to_plot))
+
+
+
