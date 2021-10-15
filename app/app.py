@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 import altair as alt
-
+st.set_page_config(layout="wide")
 # Functions 
 def plot_heatmap(data, metric):
 
@@ -99,15 +99,22 @@ if uploaded_file is not None:
     dataframe = pd.read_csv(uploaded_file, low_memory=False)
     # Get the backgrounds
     backgrounds = dataframe.target.unique().tolist()
-
+    # Selection for optional backgrounds
     selection = st.multiselect("Select backgrounds to compare:", backgrounds)
-    
+    # Widgets for scanning the heatmaps -- might be a slow option.. 
+    minpos = dataframe.position.min()
+    maxpos = dataframe.position.max()
+    center = st.sidebar.slider("Select center:", min_value=int(minpos), max_value=int(maxpos), step=1)
+    window = st.sidebar.slider("Slect window size:", min_value=10, max_value=50, step=2)
+    # Plot the heatmps 
     for background in selection: 
         subset = dataframe[dataframe.target == background]
-        subset['wildtype_code'] = (subset[['wildtype', 'mutant']].apply(lambda x: 'x' if x[0] == x[1] else '', axis=1))
+        subset['wildtype_code'] = (subset[['wildtype', 'mutant']]
+                                   .apply(lambda x: 'x' if x[0] == x[1] else '', axis=1))
+        subset_to_plot = subset.query(f"position > {center-(window/2)} & position <= {center+(window/2)}")
 
         with st.expander(f"Background: {background}"):
-            chart = plot_heatmap(subset, "delta_bind")
+            chart = plot_heatmap(subset_to_plot, "delta_bind")
             st.altair_chart(chart)
 
 else: 
