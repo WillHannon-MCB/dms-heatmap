@@ -1,9 +1,16 @@
 import pandas as pd
+import itertools
 import streamlit as st
 import altair as alt
+
+# Set the overall page configuration
 st.set_page_config(layout="wide")
+
 # Functions 
 def plot_heatmap(data, metric):
+    """
+    Plot interactive heatmaps with Altair
+    """
 
     # Select the cell in the heatmap
     cell_selector = alt.selection_single(on='mouseover',
@@ -72,6 +79,35 @@ def plot_heatmap(data, metric):
             .add_selection(cell_selector)  # mouse over highlighting
             .properties(height = 250, title = ' '.join(metric.split('_'))))
 
+
+def plot_scatter(df, bkgr_1, bkgr_2, position): 
+    """
+    Plot interactive scatter plots of binding affinity.
+    """
+    
+    # Subset df by first background 
+    bkgr_1_df = df[df.target == bkgr_1][["mutant", "position", "bind"]].rename(
+    columns = {"bind" : f"{bkgr_1}_binding"}
+    )
+    
+    # Subset df by second background
+    bkgr_2_df = df[df.target == bkgr_2][["mutant", "position", "bind"]].rename(
+    columns = {"bind" : f"{bkgr_2}_binding"}
+    )
+    
+    # Merge to make the df for plotting
+    plot_df = pd.merge(bkgr_1_df, bkgr_2_df, on=["mutant", "position"]).rename(
+    columns = {"mutant" : "Residue"}
+    )
+
+    # Make the interactive chart 
+    return alt.Chart(plot_df[plot_df.position == 500]).mark_circle(size=60).encode(
+    x=f"{bkgr_1}_binding",
+    y=f"{bkgr_2}_binding",
+    tooltip=['Residue']
+    ).interactive()
+     
+
 # Page Header 
 st.title("DMS-Heatmap")
 st.subheader("Browser-based widget for DMS datasets with multiple backgrounds.")
@@ -100,7 +136,7 @@ if uploaded_file is not None:
     # Get the backgrounds
     backgrounds = dataframe.target.unique().tolist()
     # Selection for optional backgrounds
-    selection = st.multiselect("Select backgrounds to compare:", backgrounds)
+    selection = st.multiselect("Select backgrounds for heatmap:", backgrounds)
     # Widgets for scanning the heatmaps -- might be a slow option.. 
     minpos = dataframe.position.min()
     maxpos = dataframe.position.max()
@@ -116,6 +152,25 @@ if uploaded_file is not None:
         with st.expander(f"Background: {background}"):
             chart = plot_heatmap(subset_to_plot, "delta_bind")
             st.altair_chart(chart)
+
+    # Selection for scatterplots
+    comparisons = [c for c in itertools.combinations(backgrounds, 2)]
+    scatter_selection = st.multiselect("Select backgrounds to compare:", 
+                                       comparisons,
+                                       format_func=lambda comp: f"{comp[0]} vs. {comp[1]}")
+
+    pos = st.sidebar.text_input("Position to compare:")
+    if int(pos) in set(range(minpos, maxpos)):
+        for scatterplot in scatter_selection: 
+            st.write(f"Comparing {scatterplot[0]} to {scatterplot[1]} at position {pos}")
+            scatter_chart = plot_scatter(dataframe, scatterplot[0], scatterplot[1], pos)
+            st.altair_chart(scatter_chart)
+    else:
+        st.warning(f"Make sure the position is an integer between {minpos} and {maxpos}.")
+        
+
+
+
 
 else: 
     st.info("Please input your data from a local or remote repository.")
