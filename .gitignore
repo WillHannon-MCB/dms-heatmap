@@ -7,7 +7,6 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-.vim/
 .Python
 build/
 develop-eggs/
@@ -128,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Custom
+.vim
+code_testing.ipynb
+**.DS_store
