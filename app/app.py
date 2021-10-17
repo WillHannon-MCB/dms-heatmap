@@ -2,10 +2,13 @@ import pandas as pd
 import itertools
 import streamlit as st
 import altair as alt
+from PIL import Image
 
 # Set the overall page configuration
-st.set_page_config(layout="wide")
-
+icon = Image.open("./images/flavicon.jpeg")
+st.set_page_config(layout="wide",
+                   page_title="DMS-Heatmap",
+                   page_icon=icon)
 # Functions 
 def plot_heatmap(data, metric):
     """
