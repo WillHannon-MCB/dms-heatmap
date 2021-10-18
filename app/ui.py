@@ -58,7 +58,7 @@ def control_panel_widget(dataframe):
     with col1:
         center = st.slider("Select heatmap center:", min_value=minpos, max_value=maxpos, step=1)
     with col3:
-        interval_size = st.slider("Select heatmap interval size:", min_value=10, max_value=50, step=2)
+        interval_size = st.slider("Select heatmap interval size:", min_value=10, max_value=100, step=2)
 
     return {
         'selection': selection,

@@ -21,7 +21,14 @@ with header_container:
         Welcome to `DMS-Heatmap`, the coolest way to analyze DMS data with multiple fixed backgrounds known to humankind :sunglasses:! It's as simple as uploading your data as a `*.csv` file from your computer or a remote repository. Generate heatmaps from each of the static backgrounds in your experiment and compare them using scatterplots. For more detailed instructions, click below.""")
     with st.expander("Instructions", expanded=False):
         # TODO: Add more detailed instructions where the application is mostly finished. 
-        st.markdown("Here are some **details** about using the application.")
+        st.markdown("""
+            **To get started:**
+
+            1. Upload your DMS data as a `*.csv` file from your computer or a remote repository via a URL link to the raw data. -> *Note: the data should have the following columns`[target, wildtype, position, mutant, mutation, bind, delta_bind, n_bc_bind]`*
+            2. Use the multiselect bar to choose which backgrounds to explore. Each of these selections will show up as a heatmap that can be shown or hidden. 
+            3. Due to size restrictions, the app can't display the entire heatmap at once. To adjust the display, toggle the center of the heatmap and window size using the sliders. 
+            4. If you have more than one background selected, you can compare binding at a specified position. 
+            """)
     st.markdown("---")
 
 
