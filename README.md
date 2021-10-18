@@ -9,6 +9,7 @@ __author__ : Will Hannon
 To use this application locally, first clone it from GitHub:
 ```
 git clone https://github.com/WillHannon-MCB/dms-heatmap.git
+cd dms-heatmap
 ```
 
 Then, using [`conda`](https://docs.conda.io/en/latest/), make a virtual environment with all the requirements: 
