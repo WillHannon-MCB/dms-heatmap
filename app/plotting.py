@@ -1,6 +1,7 @@
 import streamlit as st
 import altair as alt
 import pandas as pd
+from sklearn.metrics import mean_absolute_error as mae
 
 
 # Functions 
@@ -102,6 +103,7 @@ def plot_heatmap(dataframe, metric, background, interval_size, center):
             .properties(height = 350, title = ' '.join(metric.split('_'))))
 
 
+# TODO: Add MSE. 
 def plot_scatter(dataframe, metric, backgrounds, position): 
     """Function to plot the interactive scatterplots. 
     
@@ -122,6 +124,8 @@ def plot_scatter(dataframe, metric, backgrounds, position):
     ------
     alt.Chart
         Scatter plot of comparisons. 
+    float
+        Mean Absolute Wrror for a given comparison
     """
     # First Background 
     background_1_df = dataframe[dataframe.target == backgrounds[0]][["mutant", "position", metric]].rename(
@@ -138,9 +142,14 @@ def plot_scatter(dataframe, metric, backgrounds, position):
         columns = {"mutant" : "Residue"}
     )
 
+    # Calculate the MAE
+    mae_df = plot_df[[f"{backgrounds[0]}_{metric}ing", f"{backgrounds[1]}_{metric}ing"]]
+    mask = ~mae_df.isna().any(axis=1)
+    mean_error = mae(mae_df.iloc[:, 0][mask].tolist(), mae_df.iloc[:, 1][mask].tolist())
+
     # Make the interactive chart 
-    return alt.Chart(plot_df[plot_df.position == position]).mark_circle(size=60).encode(
-        x=f"{backgrounds[0]}_{metric}ing",
-        y=f"{backgrounds[1]}_{metric}ing",
+    return mean_error, alt.Chart(plot_df[plot_df.position == position]).mark_circle(size=60).encode(
+        alt.X(f"{backgrounds[0]}_{metric}ing", scale=alt.Scale(zero=False)),
+        alt.Y(f"{backgrounds[1]}_{metric}ing", scale=alt.Scale(zero=False)),
         tooltip=['Residue']
         ).interactive()

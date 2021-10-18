@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+from sklearn.metrics import mean_absolute_error as mae
 
 @st.cache()
 def load_data(upload_file):
@@ -22,3 +22,22 @@ def load_data(upload_file):
     dataframe = pd.read_csv(upload_file, low_memory=False)
     # TODO: check that relevant columns are present. 
     return dataframe
+
+
+def mean_absolute_error():
+    """Wrapper function around sklearn MAE. 
+    
+    This function handles missing values in the dataframe. 
+
+    Parameters
+    ----------
+    dataframe: pd.DataFrame 
+        A table containing the DMS binding data. 
+
+    Reutrns
+    -------
+    float: 
+        A value for the mean absolute error. 
+    """
+    pass
+    

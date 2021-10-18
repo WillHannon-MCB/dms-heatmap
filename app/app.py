@@ -6,7 +6,7 @@ import ui
 import plotting
 
 # Set the overall page configuration
-icon = Image.open("./images/flavicon.jpeg")
+icon = Image.open("./images/flavicon.png")
 st.set_page_config(layout="wide",
                    page_title="DMS-Heatmap",
                    page_icon=icon)
@@ -29,6 +29,7 @@ with header_container:
 with st.sidebar:
     # widget to handle file upload
     uploaded_file = ui.upload_widget()
+    st.markdown("---")
     if uploaded_file is not None:
         # cached function uploads the data into a pd.DataFrame
         dms_dataframe = utils.load_data(uploaded_file)
@@ -55,31 +56,38 @@ for background in parameters['selection']:
     
 
 # Plot the scatterplots
-scatter_selection = ui.scatterplot_panel_widget(parameters['selection'])
+st.markdown("---")
+inputcols = st.columns((3,1))
+with inputcols[0]:
+    scatter_selection = ui.scatterplot_panel_widget(parameters['selection'])
 
 if scatter_selection:
-    with st.sidebar:
-        position = st.number_input("Position to compare", 
+    with inputcols[1]:
+        position = st.number_input("Position to compare:", 
                                    min_value=int(dms_dataframe.position.min()), 
                                    max_value=int(dms_dataframe.position.max()),
                                    value=int(dms_dataframe.position.min()))
 
     # dynamically determines the placement of the scatter plots
-    scatter_columns = st.columns(2)
-    for i, comparions in enumerate(scatter_selection): 
-        if (i + 1) % 2 != 0:
-           with scatter_columns[0] : 
-               st.altair_chart(plotting.plot_scatter(dms_dataframe,
-                                          metric="bind", 
-                                          backgrounds=comparions, 
-                                          position=position))
-        else:
-           with scatter_columns[1] : 
-               st.altair_chart(plotting.plot_scatter(dms_dataframe,
-                                          metric="bind", 
-                                          backgrounds=comparions, 
-                                          position=position))
-
+    with st.expander("Scatter Plots"):
+        scatter_columns = st.columns(2)
+        for i, comparions in enumerate(scatter_selection): 
+            if (i + 1) % 2 != 0:
+               with scatter_columns[0]: 
+                   mae, plot = plotting.plot_scatter(dms_dataframe,
+                                              metric="bind", 
+                                              backgrounds=comparions, 
+                                              position=position)
+                   st.write(f"The MAE is **{mae:.2f}**")
+                   st.altair_chart(plot, use_container_width=True)
+            else:
+               with scatter_columns[1]: 
+                   mae, plot = plotting.plot_scatter(dms_dataframe,
+                                              metric="bind", 
+                                              backgrounds=comparions, 
+                                              position=position)
+                   st.write(f"The MAE is **{mae:.2f}**")
+                   st.altair_chart(plot, use_container_width=True)
 else:
     st.stop()
 
