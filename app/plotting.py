@@ -1,11 +1,40 @@
+import streamlit as st
 import altair as alt
 import pandas as pd
 
+
 # Functions 
-def plot_heatmap(data, metric):
+def plot_heatmap(dataframe, metric, background, interval_size, center):
+    """Function to plot altair heatmaps for a given background.
+
+    This funciton takes the main DMS dataframe used as input to the analysis. 
+    Then, using the metric to color the plot with, selected background, and window it makes the plot. 
+
+    Parameters
+    ----------
+    dataframe: pd.DataFrame
+        DMS dataframe imported into the analysis from a CSV file. 
+    metirc: str
+        Name of numeric column used to color the heatmap. 
+    background: str
+        Name of the target to filter and plot. 
+    interval_size: int 
+        Integer specifying how large the heatmap should be. 
+    center: int 
+        Integer specifying the center of the heatmap. 
+
+    Returns
+    -------
+
+    alt.Chart 
+        Altair chart of the heatmap to be displayed. 
     """
-    Plot interactive heatmaps with Altair
-    """
+
+    # Process the dataframe
+    subset = dataframe[dataframe.target == background] # background to plot
+    subset['wildtype_code'] = (subset[['wildtype', 'mutant']]
+                               .apply(lambda x: 'x' if x[0] == x[1] else '', axis=1)) # text for WT cells
+    data = subset.query(f"position > {center-(interval_size/2)} & position <= {center+(interval_size/2)}") # section to plot
 
     # Select the cell in the heatmap
     cell_selector = alt.selection_single(on='mouseover',
@@ -18,7 +47,6 @@ def plot_heatmap(data, metric):
     # Tooltips
     tooltips = ['mutation', 'n_bc_bind', 'bind']
     
-
     # Base for the heatmap
     base = (alt.Chart(data)
             .encode(x=alt.X('position:O',
@@ -71,7 +99,7 @@ def plot_heatmap(data, metric):
     return ((heatmap + nulls + wildtype)
             .interactive()
             .add_selection(cell_selector)  # mouse over highlighting
-            .properties(height = 250, title = ' '.join(metric.split('_'))))
+            .properties(height = 350, title = ' '.join(metric.split('_'))))
 
 
 def plot_scatter(df, bkgr_1, bkgr_2, position): 
@@ -100,9 +128,3 @@ def plot_scatter(df, bkgr_1, bkgr_2, position):
     y=f"{bkgr_2}_binding",
     tooltip=['Residue']
     ).interactive()
-     
-
-# Page Header 
-st.title("DMS-Heatmap")
-st.subheader("Browser-based widget for DMS datasets with multiple backgrounds.")
-

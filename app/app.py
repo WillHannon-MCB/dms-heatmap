@@ -5,6 +5,7 @@ from PIL import Image
 
 import utils
 import ui
+import plotting
 
 # Set the overall page configuration
 icon = Image.open("./images/flavicon.jpeg")
@@ -38,48 +39,29 @@ with st.sidebar:
             st.info("Please input your data from a local or remote repository.")
         st.stop()
 
-# Process and display the data 
-st.dataframe(dms_dataframe)
+
+# Get the parameters to condifure the heatmaps. 
+control_container = st.container()
+with control_container: 
+    parameters = ui.control_panel_widget(dms_dataframe)
+
+
+# Plot the heatmaps
+for background in parameters['selection']: 
+    with st.expander(f"Background: {background}"):
+        st.altair_chart(plotting.plot_heatmap(dms_dataframe, 
+                                              metric="delta_bind", 
+                                              background=background, 
+                                              interval_size=parameters['interval_size'], 
+                                              center=parameters['center']))
+    
+
+# Plot the scatterplots
+scatter_selection = ui.scatterplot_panel_widget(parameters['selection'])
+st.write(scatter_selection)
+
 st.stop()
 
-# -- Below is under active development -- ##
-# Upload the data 
-dataframe = pd.read_csv(uploaded_file, low_memory=False)
-# Get the backgrounds
-backgrounds = dataframe.target.unique().tolist()
-# Selection for optional backgrounds
-selection = st.multiselect("Select backgrounds for heatmap:", backgrounds)
-# Widgets for scanning the heatmaps -- might be a slow option.. 
-minpos = dataframe.position.min()
-maxpos = dataframe.position.max()
-center = st.sidebar.slider("Select center:", min_value=int(minpos), max_value=int(maxpos), step=1)
-window = st.sidebar.slider("Slect window size:", min_value=10, max_value=50, step=2)
-# Plot the heatmps 
-for background in selection: 
-    subset = dataframe[dataframe.target == background]
-    subset['wildtype_code'] = (subset[['wildtype', 'mutant']]
-                               .apply(lambda x: 'x' if x[0] == x[1] else '', axis=1))
-    subset_to_plot = subset.query(f"position > {center-(window/2)} & position <= {center+(window/2)}")
-
-    with st.expander(f"Background: {background}"):
-        chart = plot_heatmap(subset_to_plot, "delta_bind")
-        st.altair_chart(chart)
-
-# Selection for scatterplots
-comparisons = [c for c in itertools.combinations(backgrounds, 2)]
-scatter_selection = st.multiselect("Select backgrounds to compare:", 
-                                   comparisons,
-                                   format_func=lambda comp: f"{comp[0]} vs. {comp[1]}")
-
-pos = st.sidebar.text_input("Position to compare:")
-if int(pos) in set(range(minpos, maxpos)):
-    for scatterplot in scatter_selection: 
-        st.write(f"Comparing {scatterplot[0]} to {scatterplot[1]} at position {pos}")
-        scatter_chart = plot_scatter(dataframe, scatterplot[0], scatterplot[1], pos)
-        st.altair_chart(scatter_chart)
-else:
-    st.warning(f"Make sure the position is an integer between {minpos} and {maxpos}.")
-    
 
 
 
