@@ -103,7 +103,7 @@ def plot_heatmap(dataframe, metric, background, interval_size, center):
             .properties(height = 350, title = ' '.join(metric.split('_'))))
 
 
-# TODO: Add MSE. 
+# TODO: Add a way to filter on the numnber of barcodes.  
 def plot_scatter(dataframe, metric, backgrounds, position): 
     """Function to plot the interactive scatterplots. 
     
