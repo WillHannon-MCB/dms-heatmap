@@ -11,7 +11,7 @@ To use this application locally, first clone it from GitHub:
 git clone https://github.com/WillHannon-MCB/dms-heatmap.git
 ```
 
-Then, using `conda`, make a virtual environment with all the requirements: 
+Then, using [`conda`](https://docs.conda.io/en/latest/), make a virtual environment with all the requirements: 
 ```
 conda env create --file environment.yml
 conda activate dms-heatmap
