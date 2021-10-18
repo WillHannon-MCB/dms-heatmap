@@ -1,5 +1,3 @@
-import pandas as pd
-import itertools
 import streamlit as st
 from PIL import Image
 
@@ -66,13 +64,29 @@ if scatter_selection:
                                    max_value=int(dms_dataframe.position.max()),
                                    value=int(dms_dataframe.position.min()))
 
-    # TODO: make dynamic with the number of selections
-    st.altair_chart(plotting.plot_scatter(dms_dataframe,
+    # dynamically determines the placement of the scatter plots
+    scatter_columns = st.columns(2)
+    for i, comparions in enumerate(scatter_selection): 
+        if (i + 1) % 2 != 0:
+           with scatter_columns[0] : 
+               st.altair_chart(plotting.plot_scatter(dms_dataframe,
                                           metric="bind", 
-                                          backgrounds=scatter_selection[0], 
+                                          backgrounds=comparions, 
+                                          position=position))
+        else:
+           with scatter_columns[1] : 
+               st.altair_chart(plotting.plot_scatter(dms_dataframe,
+                                          metric="bind", 
+                                          backgrounds=comparions, 
                                           position=position))
 
-st.stop()
+else:
+    st.stop()
+
+
+
+
+
 
 
 
