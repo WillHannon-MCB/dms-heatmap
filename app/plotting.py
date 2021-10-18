@@ -102,29 +102,45 @@ def plot_heatmap(dataframe, metric, background, interval_size, center):
             .properties(height = 350, title = ' '.join(metric.split('_'))))
 
 
-def plot_scatter(df, bkgr_1, bkgr_2, position): 
-    """
-    Plot interactive scatter plots of binding affinity.
-    """
+def plot_scatter(dataframe, metric, backgrounds, position): 
+    """Function to plot the interactive scatterplots. 
     
-    # Subset df by first background 
-    bkgr_1_df = df[df.target == bkgr_1][["mutant", "position", "bind"]].rename(
-    columns = {"bind" : f"{bkgr_1}_binding"}
+    Compares the residues between two backgrounds at a given position.
+
+    Parameters
+    ----------
+    dataframe: pd.DataFrame
+        Pandas dataframe with the DMS data uploaded at the start of analysis. 
+    metric: str
+        Name of the column to compare between backgrounds
+    backgrounds: list
+        List of two background to compare. 
+    position: int
+        Position to compare, must be between min and max interval. 
+
+    Return 
+    ------
+    alt.Chart
+        Scatter plot of comparisons. 
+    """
+    # First Background 
+    background_1_df = dataframe[dataframe.target == backgrounds[0]][["mutant", "position", metric]].rename(
+        columns = {metric : f"{backgrounds[0]}_{metric}ing"}
     )
     
-    # Subset df by second background
-    bkgr_2_df = df[df.target == bkgr_2][["mutant", "position", "bind"]].rename(
-    columns = {"bind" : f"{bkgr_2}_binding"}
+    # Second Background 
+    background_2_df = dataframe[dataframe.target == backgrounds[1]][["mutant", "position", metric]].rename(
+        columns = {metric : f"{backgrounds[1]}_{metric}ing"}
     )
-    
+
     # Merge to make the df for plotting
-    plot_df = pd.merge(bkgr_1_df, bkgr_2_df, on=["mutant", "position"]).rename(
-    columns = {"mutant" : "Residue"}
+    plot_df = pd.merge(background_1_df, background_2_df, on=["mutant", "position"]).rename(
+        columns = {"mutant" : "Residue"}
     )
 
     # Make the interactive chart 
-    return alt.Chart(plot_df[plot_df.position == 500]).mark_circle(size=60).encode(
-    x=f"{bkgr_1}_binding",
-    y=f"{bkgr_2}_binding",
-    tooltip=['Residue']
-    ).interactive()
+    return alt.Chart(plot_df[plot_df.position == position]).mark_circle(size=60).encode(
+        x=f"{backgrounds[0]}_{metric}ing",
+        y=f"{backgrounds[1]}_{metric}ing",
+        tooltip=['Residue']
+        ).interactive()

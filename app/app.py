@@ -58,7 +58,19 @@ for background in parameters['selection']:
 
 # Plot the scatterplots
 scatter_selection = ui.scatterplot_panel_widget(parameters['selection'])
-st.write(scatter_selection)
+
+if scatter_selection:
+    with st.sidebar:
+        position = st.number_input("Position to compare", 
+                                   min_value=int(dms_dataframe.position.min()), 
+                                   max_value=int(dms_dataframe.position.max()),
+                                   value=int(dms_dataframe.position.min()))
+
+    # TODO: make dynamic with the number of selections
+    st.altair_chart(plotting.plot_scatter(dms_dataframe,
+                                          metric="bind", 
+                                          backgrounds=scatter_selection[0], 
+                                          position=position))
 
 st.stop()
 
